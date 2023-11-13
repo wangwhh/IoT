@@ -129,7 +129,7 @@ export default {
 </script>
 
 <style scoped>
-.arco-grid.panel {
+.panel {
     margin-bottom: 1%;
     padding: 16px 20px 0 20px;
 }
