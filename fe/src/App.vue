@@ -5,9 +5,9 @@ import Menu from "@/components/menu.vue";
 
 <template>
     <a-layout style="height: 100%;">
-        <a-layout-header style="height: 64px">
-            <img src="@/assets/logo.svg" alt="" style="width: 40px; position: relative; top: 25%; left: 1%">
-            <a-typography-text style="position: relative; top: 5%; left: 2%; font-size: 22px; font-family: 'Microsoft YaHei UI'">Internet of Things - 物联网管理系统</a-typography-text>
+        <a-layout-header style="height: 5%">
+            <img src="@/assets/logo.svg" alt="" style="width: 40px; position: relative; top: 20%; left: 1%">
+            <a-typography-text style="position: relative; left: 2%; font-size: 120%; font-family: 'Microsoft YaHei UI'">Internet of Things - 物联网管理系统</a-typography-text>
         </a-layout-header>
         <a-layout-content>
             <a-layout style="height: 99%">

@@ -1,10 +1,10 @@
 <template>
     <a-typography-title :heading="3" style="margin-left: 3%; margin-bottom: 2%"> 欢迎！Wang</a-typography-title>
     <a-divider :margin="10"><icon-star /></a-divider>
-    <a-grid :cols="24" :row-gap="16" class="panel">
+    <a-grid :cols="4" :row-gap="16" class="panel">
         <a-grid-item
                 class="panel-col"
-                :span="{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12, xxl: 6 }"
+                :span="{ xs: 4, sm: 4, md: 2, lg: 1, xl: 1, xxl: 1 }"
         >
             <a-space>
                 <a-avatar :size="54" class="col-avatar">
@@ -26,7 +26,7 @@
         </a-grid-item>
         <a-grid-item
                 class="panel-col"
-                :span="{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12, xxl: 6 }"
+                :span="{ xs: 4, sm: 4, md: 2, lg: 1, xl: 1, xxl: 1 }"
         >
             <a-space>
                 <a-avatar :size="54" class="col-avatar">
@@ -48,7 +48,7 @@
 
         <a-grid-item
                 class="panel-col"
-                :span="{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12, xxl: 6 }"
+                :span="{ xs: 4, sm: 4, md: 2, lg: 1, xl: 1, xxl: 1 }"
         >
             <a-space>
                 <a-avatar :size="54" class="col-avatar">
@@ -70,7 +70,7 @@
 
         <a-grid-item
                 class="panel-col"
-                :span="{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12, xxl: 6 }"
+                :span="{ xs: 4, sm: 4, md: 2, lg: 1, xl: 1, xxl: 1 }"
         >
             <a-space>
                 <a-avatar :size="54" class="col-avatar">
@@ -92,7 +92,7 @@
     </a-grid>
     <a-divider :margin="10"><icon-star /></a-divider>
     <a-grid :cols="2" :row-gap="16">
-        <a-grid-item>
+        <a-grid-item :span="{ xs: 2, sm: 2, md: 2, lg: 1, xl: 1, xxl: 1 }">
             <a-card
                 class="chart-card"
                 :header-style="{ paddingBottom: '0' }"
@@ -100,7 +100,7 @@
                 <line-chart class="chart" />
             </a-card>
         </a-grid-item>
-        <a-grid-item>
+        <a-grid-item :span="{ xs: 2, sm: 2, md: 2, lg: 1, xl: 1, xxl: 1 }">
             <a-card
                 class="chart-card"
                 :header-style="{ paddingBottom: '0' }"

@@ -17,7 +17,7 @@
         </template>
     </a-input-search>
 
-    <a-button type="primary" style="margin-left: 2%">
+    <a-button type="primary" style="margin-left: 2%" @click="openInsertForm">
         <template #icon>
             <icon-plus />
         </template>
@@ -32,9 +32,9 @@
                 <template #actions>
                     <a-tag color="arcoblue">{{type2str(device.type)}}</a-tag>
                     <a-badge dot :count="9" :max-count="10" :offset="[-1, 1]">
-                        <span class="icon-hover" style="font-size: 20px"> <IconMessage /> </span>
+                        <span class="icon-hover" style="font-size: 20px" @click="openMsgList(device)"> <IconMessage /> </span>
                     </a-badge>
-                    <span class="icon-hover" style="font-size: 20px" @click="openEditForm"> <icon-edit /> </span>
+                    <span class="icon-hover" style="font-size: 20px" @click="openEditForm(device)"> <icon-edit /> </span>
                 </template>
                 <template #cover>
 
@@ -58,26 +58,65 @@
         </a-grid-item>
     </a-grid>
 
-    <a-modal :visible="edit_visible" @ok="handleOk" @cancel="handleCancel">
+    <a-modal :visible="edit_visible" @ok="editOk" @cancel="editCancel">
         <template #title>
-            Title
+            修改设备信息
         </template>
-        <a-form :model="form" visible="false">
-            <a-form-item field="name" label="Username">
-                <a-input v-model="form.name" placeholder="please enter your username..." />
+        <a-form :model="edit_form">
+            <a-form-item field="name" label="设备名称">
+                <a-input v-model="edit_form.name" />
             </a-form-item>
-            <a-form-item field="post" label="Post">
-                <a-input v-model="form.post" placeholder="please enter your post..." />
-            </a-form-item>
-            <a-form-item field="isRead">
-                <a-checkbox v-model="form.isRead">
-                    I have read the manual
-                </a-checkbox>
-            </a-form-item>
-            <a-form-item>
-                <a-button>Submit</a-button>
+            <a-form-item field="type" label="设备类型">
+                <a-select v-model="edit_form.type" >
+                    <a-option>照明</a-option>
+                    <a-option>家电</a-option>
+                    <a-option>能耗</a-option>
+                    <a-option>安防</a-option>
+                    <a-option>其他</a-option>
+                </a-select>
             </a-form-item>
         </a-form>
+    </a-modal>
+
+    <a-modal :visible="insert_visible" @ok="insertOk" @cancel="insertCancel">
+        <template #title>
+            添加设备
+        </template>
+        <a-form :model="insert_form">
+            <a-form-item field="name" label="设备名称">
+                <a-input v-model="insert_form.name" />
+            </a-form-item>
+            <a-form-item field="type" label="设备类型">
+                <a-select v-model="insert_form.type" >
+                    <a-option>照明</a-option>
+                    <a-option>家电</a-option>
+                    <a-option>能耗</a-option>
+                    <a-option>安防</a-option>
+                    <a-option>其他</a-option>
+                </a-select>
+            </a-form-item>
+        </a-form>
+    </a-modal>
+
+    <a-modal :visible="msg_visible" @ok="msgOk" @cancel="msgCancel" hideCancel >
+        <template #title>
+            消息列表
+        </template>
+        <a-list :max-height="240" scrollbar>
+            <template #header>
+                {{ msg_list.device_name }}
+            </template>
+            <a-list-item v-for="msg in msg_list.list">
+                <a-list-item-meta :title="msg.time" :description="msg.msg">
+                    <template #avatar>
+                        <a-avatar :style="{ backgroundColor: msg.state === 1 ? '#4080FF':'#F76560' }">
+                            <icon-check v-if="msg.state === 1"/>
+                            <icon-exclamation v-if="msg.state === 0"/>
+                        </a-avatar>
+                    </template>
+                </a-list-item-meta>
+            </a-list-item>
+        </a-list>
     </a-modal>
 
 </template>
@@ -90,30 +129,53 @@ export default {
 
     setup() {
         const devices = ref([{
-            name: "智能灯光", id: 1, type:'light', msg_cnt: 10, SOC: 1, description: '这是客厅的灯。'
+            name: "智能灯光", id: 1, type:'light', SOC: 1, description: '这是客厅的灯。',
+            msg_list: [{
+                time: "2023-11-1", msg: "灯泡寿命已过期，请及时更换。", state: 0
+            }, {
+                time: "2023-11-2", msg: "更换成功。", state: 1
+            }, {
+                time: "2023-11-3", msg: "调节灯光亮度。", state: 1
+        }]
         }, {
-            name: "智能冰箱", id: 2, type:'HA', msg_cnt: 10, SOC: 1, description: '冰箱正常工作中。'
+            name: "智能冰箱", id: 2, type:'HA', SOC: 1, description: '冰箱正常工作中。',
+            msg_list:[]
         }, {
-            name: "扫地机器人", id: 3, type:'HA', msg_cnt: 10, SOC: 0.5, description: '很好用的扫地机器人。'
+            name: "扫地机器人", id: 3, type:'HA', SOC: 0.5, description: '很好用的扫地机器人。',
+            msg_list: []
         }, {
-            name: "智能空调", id: 4, type:'HA', msg_cnt: 10, SOC: 1, description: '空调现在27°。'
+            name: "智能空调", id: 4, type:'HA', SOC: 1, description: '空调现在27°。',
+            msg_list: []
         }, {
-            name: "智能电动车", id: 5, type:'EC', msg_cnt: 10, SOC: 0.15, description: '爱车该充电了。'
+            name: "智能电动车", id: 5, type:'EC', SOC: 0.15, description: '爱车该充电了。',
+            msg_list: []
         }, {
-            name: "智能门锁", id: 6, type:'Secure', msg_cnt: 10, SOC: 1, description: '门锁已上锁。'
+            name: "智能门锁", id: 6, type:'Secure', SOC: 1, description: '门锁已上锁。',
+            msg_list: []
         }, {
-            name: "监控摄像头", id: 7, type:'Secure', msg_cnt: 10, SOC: 1, description: '监控摄像头正常工作中。'
+            name: "监控摄像头", id: 7, type:'Secure', SOC: 1, description: '监控摄像头正常工作中。',
+            msg_list: []
         }]);
         const selected_devices = ref(devices.value);
-
         const select_tag = ref(['照明', '家电', '能耗', '安防', '其他']);
 
         const edit_visible = ref(false);
-
-        const form = ref({
+        const edit_form = ref({
+            id: '',
             name: '',
-            post: '',
-            isRead: false,
+            type: '',
+        });
+
+        const insert_visible = ref(false);
+        const insert_form = ref({
+            name: '',
+            type: '',
+        });
+
+        const msg_visible = ref(false);
+        const msg_list = ref({
+            device_name: '' ,
+            list: []
         });
 
         function type2str(type){
@@ -141,23 +203,51 @@ export default {
             }
         }
 
-        function handleOk(){
-            console.log(form.value);
+        function editOk(){
+            console.log(edit_form.value);
             edit_visible.value = false;
         }
 
-        function handleCancel(){
+        function editCancel(){
             edit_visible.value = false;
         }
 
-        function openEditForm(){
-            console.log('open');
+        function insertOk(){
+            console.log(insert_form.value);
+            insert_visible.value = false;
+        }
+
+        function insertCancel(){
+            insert_visible.value = false;
+        }
+
+        function openEditForm(device){
+            edit_form.value.id = device.id;
             edit_visible.value = true;
         }
 
+        function openInsertForm(){
+            console.log('open');
+            insert_visible.value = true;
+        }
+
+        function msgOk(){
+            msg_visible.value = false;
+        }
+
+        function msgCancel(){
+            msg_visible.value = false;
+        }
+
+        function openMsgList(device){
+            msg_list.value.list = device.msg_list;
+            msg_list.value.device_name = device.name;
+            msg_visible.value = true;
+        }
+
         return{
-          devices, select_tag, selected_devices, edit_visible, form,
-          type2str, updateSelect, handleOk, openEditForm, handleCancel
+          devices, select_tag, selected_devices, edit_visible, edit_form, insert_visible, insert_form, msg_visible, msg_list,
+          type2str, updateSelect, openEditForm, openInsertForm, editOk, editCancel, insertOk, insertCancel, msgOk, msgCancel, openMsgList
         }
     }
 }
