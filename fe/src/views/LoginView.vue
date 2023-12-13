@@ -54,6 +54,9 @@
 <script>
 
 import router from "@/router";
+import api from "@/api/api";
+import md5 from 'js-md5';
+import { Notification } from '@arco-design/web-vue';
 
 export default {
     data() {
@@ -92,8 +95,31 @@ export default {
             this.state = 'login';
         },
         handleLogin() {
-            console.log(this.loginForm);
-            router.push('/home');
+            api.post('/user/login', {
+                    userName: this.loginForm.name,
+                    password: md5(this.loginForm.pwd),
+                }).then(res => {
+                // console.log(res);
+                if(res.data.code === 10000) {
+                    Notification.success({
+                        title: '登录成功',
+                        content: '欢迎回来',
+                    });
+                    sessionStorage.setItem('token', res.data.data.token);
+                    api.defaults.headers.common['Authorization'] = res.data.data.token;
+                    router.push('/home');
+                }else {
+                    // console.log(res.data)
+                    Notification.error({
+                        title: '登录失败',
+                        content: res.data.message,
+                    });
+                }
+            }).catch(err => {
+                console.log(err);
+
+            })
+            //router.push('/home');
         },
         handleRegister() {
             function validEmail(email) {
@@ -137,7 +163,26 @@ export default {
                 this.alerts.flag = false;
                 this.errorStatus.pwd2 = false;
             }
-            console.log(this.registerForm);
+            api.post('/user/register', {
+                email: this.registerForm.email,
+                userName: this.registerForm.name,
+                password: md5(this.registerForm.pwd),
+            }).then(res => {
+                if(res.data.code === 10000) {
+                    Notification.success({
+                        title: '注册成功',
+                        content: '请登录',
+                    });
+                    this.switchToLogin();
+                }else {
+                    Notification.error({
+                        title: '注册失败',
+                        content: res.data.message,
+                    });
+                }
+            }).catch(err => {
+                console.log(err);
+            })
         },
 
     }
