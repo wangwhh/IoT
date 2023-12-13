@@ -17,7 +17,7 @@
         </template>
     </a-input-search>
 
-    <a-button type="primary" style="margin-left: 2%" @click="openInsertForm">
+    <a-button type="primary" style="margin-left: 2%" @click="insert_visible = true;">
         <template #icon>
             <icon-plus />
         </template>
@@ -30,27 +30,31 @@
         <a-grid-item v-for="device in selected_devices">
             <a-card class="device-card" hoverable>
                 <template #actions>
-                    <a-tag color="arcoblue">{{type2str(device.type)}}</a-tag>
+                    <a-tag color="arcoblue">{{device.type}}</a-tag>
                     <a-badge dot :count="9" :max-count="10" :offset="[-1, 1]">
-                        <span class="icon-hover" style="font-size: 20px" @click="openMsgList(device)"> <IconMessage /> </span>
+                        <span class="icon-hover" style="font-size: 20px" @click="openMsgList"> <IconMessage /> </span>
                     </a-badge>
                     <span class="icon-hover" style="font-size: 20px" @click="openEditForm(device)"> <icon-edit /> </span>
+                    <a-popconfirm content="确认要删除这个设备吗？" type="warning" @ok="handleDelete(device)">
+                        <span class="icon-hover" style="font-size: 20px"> <icon-delete /> </span>
+                    </a-popconfirm>
+
                 </template>
                 <template #cover>
 
                     <a-progress class="progress"
                                 type="circle"
-                                :percent="device.SOC"
+                                :percent="device.soc"
                                 size="large"
-                                :color="device.SOC>0.2 ? (device.SOC>0.8 ? '#23C343' : '#4080FF') : '#F53F3F'"/>
+                                :color="device.soc>0.2 ? (device.soc>0.8 ? '#23C343' : '#4080FF') : '#F53F3F'"/>
 
                 </template>
-                <a-card-meta :title="device.name" :description="device.description">
+                <a-card-meta :title="device.deviceName" :description="device.description">
                     <template #avatar>
                         <div
                             :style="{  alignItems: 'center', color: '#1D2129' }"
                         >
-                            <a-typography-text style="font-size: 16px">#{{device.id}}</a-typography-text>
+                            <a-typography-text style="font-size: 16px">#{{device.deviceId}}</a-typography-text>
                         </div>
                     </template>
                 </a-card-meta>
@@ -58,13 +62,13 @@
         </a-grid-item>
     </a-grid>
 
-    <a-modal :visible="edit_visible" @ok="editOk" @cancel="editCancel">
+    <a-modal :visible="edit_visible" @ok="editOk" @cancel="edit_visible=false">
         <template #title>
             修改设备信息
         </template>
         <a-form :model="edit_form">
             <a-form-item field="name" label="设备名称">
-                <a-input v-model="edit_form.name" />
+                <a-input v-model="edit_form.deviceName" />
             </a-form-item>
             <a-form-item field="type" label="设备类型">
                 <a-select v-model="edit_form.type" >
@@ -75,16 +79,19 @@
                     <a-option>其他</a-option>
                 </a-select>
             </a-form-item>
+            <a-form-item label="设备简介">
+                <a-input v-model="edit_form.description" />
+            </a-form-item>
         </a-form>
     </a-modal>
 
-    <a-modal :visible="insert_visible" @ok="insertOk" @cancel="insertCancel">
+    <a-modal :visible="insert_visible" @ok="insertOk" @cancel="insert_visible=false">
         <template #title>
             添加设备
         </template>
         <a-form :model="insert_form">
             <a-form-item field="name" label="设备名称">
-                <a-input v-model="insert_form.name" />
+                <a-input v-model="insert_form.deviceName" />
             </a-form-item>
             <a-form-item field="type" label="设备类型">
                 <a-select v-model="insert_form.type" >
@@ -95,14 +102,17 @@
                     <a-option>其他</a-option>
                 </a-select>
             </a-form-item>
+            <a-form-item filed="description" label="设备简介">
+                <a-input v-model="insert_form.description" />
+            </a-form-item>
         </a-form>
     </a-modal>
 
-    <a-modal :visible="msg_visible" @ok="msgOk" @cancel="msgCancel" hideCancel >
+    <a-modal :visible="msg_visible" @ok="msg_visible=false" @cancel="msg_visible=false" hideCancel >
         <template #title>
             消息列表
         </template>
-        <a-list :max-height="240" scrollbar>
+        <a-list :max-height="300" scrollbar>
             <template #header>
                 {{ msg_list.device_name }}
             </template>
@@ -123,54 +133,45 @@
 
 <script>
 
-import {ref} from "vue";
+import {ref, onMounted} from "vue";
+import api from "@/api/api";
+import router from "@/router";
+import {Notification} from "@arco-design/web-vue";
 export default {
     name: "DeviceView",
 
     setup() {
-        const devices = ref([{
-            name: "智能灯光", id: 1, type:'light', SOC: 1, description: '这是客厅的灯。',
-            msg_list: [{
-                time: "2023-11-1", msg: "灯泡寿命已过期，请及时更换。", state: 0
-            }, {
-                time: "2023-11-2", msg: "更换成功。", state: 1
-            }, {
-                time: "2023-11-3", msg: "调节灯光亮度。", state: 1
-        }]
-        }, {
-            name: "智能冰箱", id: 2, type:'HA', SOC: 1, description: '冰箱正常工作中。',
-            msg_list:[]
-        }, {
-            name: "扫地机器人", id: 3, type:'HA', SOC: 0.5, description: '很好用的扫地机器人。',
-            msg_list: []
-        }, {
-            name: "智能空调", id: 4, type:'HA', SOC: 1, description: '空调现在27°。',
-            msg_list: []
-        }, {
-            name: "智能电动车", id: 5, type:'EC', SOC: 0.15, description: '爱车该充电了。',
-            msg_list: []
-        }, {
-            name: "智能门锁", id: 6, type:'Secure', SOC: 1, description: '门锁已上锁。',
-            msg_list: []
-        }, {
-            name: "监控摄像头", id: 7, type:'Secure', SOC: 1, description: '监控摄像头正常工作中。',
-            msg_list: []
-        }]);
+        const devices = ref();
+
         const selected_devices = ref(devices.value);
         const select_tag = ref(['照明', '家电', '能耗', '安防', '其他']);
 
         const edit_visible = ref(false);
         const edit_form = ref({
-            id: '',
-            name: '',
+            deviceId: '',
+            ownerId: '',
+            deviceName: '',
             type: '',
+            description: '',
         });
 
         const insert_visible = ref(false);
         const insert_form = ref({
-            name: '',
+            deviceName: '',
             type: '',
+            description: '',
+            addDate: getToday(),
+            soc: 1,
+            msgCnt: 0,
         });
+
+        function getToday(){
+            let date = new Date();
+            let year = date.getFullYear();
+            let month = date.getMonth()+1;
+            let day = date.getDate();
+            return year+'-'+month+'-'+day;
+        }
 
         const msg_visible = ref(false);
         const msg_list = ref({
@@ -178,65 +179,121 @@ export default {
             list: []
         });
 
-        function type2str(type){
-            switch(type){
-                case 'light':
-                    return '照明';
-                case 'HA':
-                    return '家电';
-                case 'EC':
-                    return '能耗';
-                case 'Secure':
-                    return '安防';
-                case 'other':
-                    return '其他';
-            }
+        async function getDevices(){
+            await api.get('/device/list', {}).then((res) => {
+                if(res.data.code === 10000) {
+                    // console.log(res.data)
+                    devices.value = res.data.data;
+                    selected_devices.value = devices.value;
+                    // console.log(devices.value);
+                } else {
+                    if (res.data.code === 20003) {
+                        Notification.error({
+                            title: '登录信息无效',
+                            content: '请先登录',
+                        });
+                        router.push('/login');
+                    } else {
+                        Notification.error({
+                            title: '获取设备列表失败',
+                            content: '请稍后再试',
+                        });
+                    }
+                }
+            }).catch((err) => {
+                console.log(err);
+                Notification.error({
+                    title: '登录信息失效',
+                    content: '请重新登录',
+                });
+                router.push('/login');
+            })
         }
 
         function updateSelect(value){
             select_tag.value = value;
             selected_devices.value = [];
             for(let i=0; i<devices.value.length; i++){
-                if(select_tag.value.indexOf(type2str(devices.value[i].type)) !== -1){
+                if(select_tag.value.indexOf(devices.value[i].type) !== -1){
                     selected_devices.value.push(devices.value[i]);
                 }
             }
         }
 
         function editOk(){
-            console.log(edit_form.value);
+            api.post('/device/update', edit_form.value).then((res) => {
+                if (res.data.code === 10000) {
+                    Notification.success({
+                        title: '修改成功',
+                        content: '设备信息已更新',
+                    });
+                    getDevices();
+                } else {
+                    if (res.data.code === 20003) {
+                        Notification.error({
+                            title: '登录信息无效',
+                            content: '请先登录',
+                        });
+                        router.push('/login');
+                    } else {
+                        Notification.error({
+                            title: '修改失败',
+                            content: res.data.message,
+                        });
+                    }
+                }
+            }).catch((err) => {
+                console.log(err);
+                Notification.error({
+                    title: '登录信息失效',
+                    content: '请重新登录',
+                });
+                router.push('/login');
+            })
             edit_visible.value = false;
         }
 
-        function editCancel(){
-            edit_visible.value = false;
-        }
 
         function insertOk(){
-            console.log(insert_form.value);
+            // console.log(insert_form.value);
+            api.post('device/add', insert_form.value).then((res) => {
+                if (res.data.code === 10000) {
+                    Notification.success({
+                        title: '添加成功',
+                        content: '您的设备编号为【'+'res.data.data'+'】，后续请使用该编号与您的设备进行绑定。',
+                        closable: true,
+                        duration: 0,
+                    });
+                    getDevices();
+                } else {
+                    if (res.data.code === 20003) {
+                        Notification.error({
+                            title: '登录信息无效',
+                            content: '请先登录',
+                        });
+                        router.push('/login');
+                    } else {
+                        Notification.error({
+                            title: '添加失败',
+                            content: res.data.message,
+                        });
+                    }
+                }
+            }).catch((err) => {
+                console.log(err);
+                Notification.error({
+                    title: '登录信息失效',
+                    content: '请重新登录',
+                });
+                router.push('/login');
+            })
             insert_visible.value = false;
         }
 
-        function insertCancel(){
-            insert_visible.value = false;
-        }
 
         function openEditForm(device){
-            edit_form.value.id = device.id;
+            edit_form.value = device;
             edit_visible.value = true;
-        }
-
-        function openInsertForm(){
-            console.log('open');
-            insert_visible.value = true;
-        }
-
-        function msgOk(){
-            msg_visible.value = false;
-        }
-
-        function msgCancel(){
-            msg_visible.value = false;
         }
 
         function openMsgList(device){
@@ -245,9 +302,45 @@ export default {
             msg_visible.value = true;
         }
 
+        function handleDelete(device){
+            api.post('/device/delete', device).then((res) => {
+                if (res.data.code === 10000) {
+                    Notification.success({
+                        title: '删除成功',
+                        content: '设备已删除',
+                    });
+                    getDevices();
+                } else {
+                    if (res.data.code === 20003) {
+                        Notification.error({
+                            title: '登录信息无效',
+                            content: '请先登录',
+                        });
+                        // router.push('/login');
+                    } else {
+                        Notification.error({
+                            title: '删除失败',
+                            content: res.data.message,
+                        });
+                    }
+                }
+            }).catch((err) => {
+                console.log(err);
+                Notification.error({
+                    title: '登录信息失效',
+                    content: '请重新登录',
+                });
+                // router.push('/login');
+            })
+        }
+
+        onMounted(() => {
+            getDevices();
+        })
+
         return{
           devices, select_tag, selected_devices, edit_visible, edit_form, insert_visible, insert_form, msg_visible, msg_list,
-          type2str, updateSelect, openEditForm, openInsertForm, editOk, editCancel, insertOk, insertCancel, msgOk, msgCancel, openMsgList
+          updateSelect, openEditForm, editOk, insertOk, handleDelete, openMsgList
         }
     }
 }

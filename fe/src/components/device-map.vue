@@ -13,28 +13,42 @@ export default {
     setup() {
         const locationData = ref([{
             device_id: 1,
+            name: '智能灯光',
+            msg_cnt: 10,
             position: [116.39, 39.9],
         }, {
             device_id: 2,
+            name: '智能冰箱',
+            msg_cnt: 5,
             position: [116.25, 39.85],
         }, {
             device_id: 3,
+            name: '扫地机器人',
+            msg_cnt: 3,
             position: [116.6, 39.9],
         }, {
             device_id: 4,
+            name: '智能空调',
+            msg_cnt: 2,
             position: [116.7, 39.77],
         }, {
             device_id: 5,
+            name: '智能电动车',
+            msg_cnt: 20,
             position: [116.8, 40],
         }, {
             device_id: 6,
+            name: '智能门锁',
+            msg_cnt: 1,
             position: [116.42, 40.05],
         }, {
             device_id: 7,
+            name: '监控摄像头',
+            msg_cnt: 0,
             position: [116.38, 40.2],
         }])
         let map = shallowRef(null);
-        const hoverDeviceId = ref();
+        const hover_device_ind = ref();
 
 
         function initMap() {
@@ -58,12 +72,12 @@ export default {
                 });
 
                 const openMarkerBox = function (e) {
-                    hoverDeviceId.value = e.target._originOpts.device_id;
+                    hover_device_ind.value = e.target._originOpts.device_ind;
                     contentElement.className = 'echarts-tooltip-diy';
                     contentElement.innerHTML = `
                         <div style="padding: 10px">
-                            <p class="tooltip-title">Title</p>
-                            <div class="content-panel"><span>${hoverDeviceId.value}</span><span class="tooltip-value">xx</span></div>
+                            <p class="tooltip-title">${locationData.value[hover_device_ind.value].name}</p>
+                            <div class="content-panel"><span>消息数量</span><span class="tooltip-value">${locationData.value[hover_device_ind.value].msg_cnt}</span></div>
                         </div>
                     `;
                     infoWindow.content= contentElement;
@@ -80,7 +94,7 @@ export default {
                         icon: icon,
                         offset: new AMap.Pixel(-13, -30),
                         position: locationData.value[i].position,
-                        device_id: locationData.value[i].device_id,
+                        device_ind: i,
                     });
                     marker.on('mouseover', openMarkerBox);
 
@@ -97,7 +111,7 @@ export default {
 
 
         return {
-          map, initMap
+          map, initMap, locationData, hover_device_ind
         };
     },
     methods: {
