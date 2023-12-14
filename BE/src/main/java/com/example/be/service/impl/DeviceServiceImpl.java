@@ -6,11 +6,12 @@ import com.example.be.entity.Device;
 import com.example.be.mapper.DeviceMapper;
 import com.example.be.service.IDeviceService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Options;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -24,6 +25,9 @@ import java.util.List;
 @Service
 public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> implements IDeviceService {
 
+    @Autowired
+    private DeviceMapper deviceMapper;
+
     @Override
     public Result<List<Device>> getDeviceList(Integer userId) {
         LambdaQueryWrapper<Device> wrapper = new LambdaQueryWrapper<>();
@@ -35,19 +39,23 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
     @Override
     public Result<Integer> addDevice(Device device) {
         this.baseMapper.insert(device);
-
+        deviceMapper.insertMessage(device.getDeviceId(), "添加设备"+device.getDeviceName(), 1, device.getAddDate().toString());
         return Result.success("添加成功", device.getDeviceId());
     }
 
     @Override
     public Result<String> updateDevice(Device device) {
         this.baseMapper.updateById(device);
+        Date date = new Date(System.currentTimeMillis());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        deviceMapper.insertMessage(device.getDeviceId(), "修改设备信息", 1, dateFormat.format(date));
         return Result.success("更新成功");
     }
 
     @Override
     public Result<String> deleteDevice(Device device) {
         this.baseMapper.deleteById(device.getDeviceId());
+        deviceMapper.deleteMessage(device.getDeviceId());
         return Result.success("删除成功");
     }
 

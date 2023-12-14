@@ -260,7 +260,7 @@ export default {
                 if (res.data.code === 10000) {
                     Notification.success({
                         title: '添加成功',
-                        content: '您的设备编号为【'+'res.data.data'+'】，后续请使用该编号与您的设备进行绑定。',
+                        content: '您的设备编号为【'+res.data.data+'】，后续请使用该编号与您的设备进行绑定。',
                         closable: true,
                         duration: 0,
                     });
