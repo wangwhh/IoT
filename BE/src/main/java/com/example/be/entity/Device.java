@@ -2,8 +2,11 @@ package com.example.be.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -11,7 +14,7 @@ import java.time.LocalDate;
  * </p>
  *
  * @author wangwhh
- * @since 2023-12-12
+ * @since 2023-12-14
  */
 public class Device implements Serializable {
 
@@ -26,7 +29,8 @@ public class Device implements Serializable {
 
     private String description;
 
-    private LocalDate addDate;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime addDate;
 
     private Double soc;
 
@@ -35,8 +39,6 @@ public class Device implements Serializable {
     private Double longitude;
 
     private Double latitude;
-
-    private Integer msgCnt;
 
     public Integer getDeviceId() {
         return deviceId;
@@ -70,11 +72,11 @@ public class Device implements Serializable {
         this.description = description;
     }
 
-    public LocalDate getAddDate() {
+    public LocalDateTime getAddDate() {
         return addDate;
     }
 
-    public void setAddDate(LocalDate addDate) {
+    public void setAddDate(LocalDateTime addDate) {
         this.addDate = addDate;
     }
 
@@ -110,14 +112,6 @@ public class Device implements Serializable {
         this.latitude = latitude;
     }
 
-    public Integer getMsgCnt() {
-        return msgCnt;
-    }
-
-    public void setMsgCnt(Integer msgCnt) {
-        this.msgCnt = msgCnt;
-    }
-
     @Override
     public String toString() {
         return "Device{" +
@@ -130,7 +124,6 @@ public class Device implements Serializable {
             ", type = " + type +
             ", longitude = " + longitude +
             ", latitude = " + latitude +
-            ", msgCnt = " + msgCnt +
         "}";
     }
 }

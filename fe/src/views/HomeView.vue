@@ -1,5 +1,5 @@
 <template>
-    <a-typography-title :heading="3" style="margin-left: 3%; margin-bottom: 2%"> 欢迎！Wang</a-typography-title>
+    <a-typography-title :heading="3" style="margin-left: 3%; margin-bottom: 2%"> 欢迎！{{user_name}}</a-typography-title>
     <a-divider :margin="10"><icon-star /></a-divider>
     <a-grid :cols="4" :row-gap="16" class="panel">
         <a-grid-item
@@ -12,7 +12,7 @@
                 </a-avatar>
                 <a-statistic
                         title="设备总量"
-                        :value="10"
+                        :value=device_cnt
                         :precision="0"
                         :value-from="0"
                         animation
@@ -34,7 +34,7 @@
                 </a-avatar>
                 <a-statistic
                         title="在线总量"
-                        :value="8"
+                        :value=online_cnt
                         :value-from="0"
                         animation
                         show-group-separator
@@ -56,7 +56,7 @@
                 </a-avatar>
                 <a-statistic
                         title="接收数据量"
-                        :value="100"
+                        :value=msg_cnt
                         :value-from="0"
                         animation
                         show-group-separator
@@ -114,14 +114,91 @@
 
 <script>
 import Menu from '../components/menu.vue'
+import { ref, onMounted } from 'vue';
 import pieChart from "@/components/pie-chart.vue";
 import lineChart from "@/components/line-chart.vue";
+import api from "@/api/api";
+import router from "@/router";
+import { Notification } from '@arco-design/web-vue';
 export default {
     name: "HomeView",
     components: {pieChart, lineChart, Menu},
-    data() {
-        return {
+    setup() {
+        const user_name = ref('');
+        const device_cnt = ref(0);
+        const online_cnt = ref(0);
+        const msg_cnt = ref(0);
+        const new_cnt = ref(0);
+        async function fetchUserName() {
+            await api.get('/user/info', {}).then((res) => {
+                if (res.data.code === 10000) {
+                    user_name.value = res.data.data.userName;
+                } else {
+                    if (res.data.code === 20003) {
+                        Notification.error({
+                            title: '登录信息无效',
+                            content: '请先登录',
+                        });
+                        router.push('/login');
+                    } else {
+                        Notification.error({
+                            title: '获取用户信息失败',
+                            content: '请稍后再试',
+                        });
+                    }
+                }
+            }).catch((err) => {
+                console.log(err);
+                Notification.error({
+                    title: '登录信息失效',
+                    content: '请重新登录',
+                });
+                router.push('/login');
+            })
+        }
 
+        async function fetchDeviceCount() {
+            await api.get('/device/count', {}).then((res) => {
+                if (res.data.code === 10000) {
+                    // console.log(res.data.data);
+                    device_cnt.value = res.data.data.device_cnt;
+                    online_cnt.value = res.data.data.online_cnt;
+                    msg_cnt.value = res.data.data.total_msg;
+                } else {
+                    if (res.data.code === 20003) {
+                        Notification.error({
+                            title: '登录信息无效',
+                            content: '请先登录',
+                        });
+                        router.push('/login');
+                    } else {
+                        Notification.error({
+                            title: '获取用户信息失败',
+                            content: '请稍后再试',
+                        });
+                    }
+                }
+            }).catch((err) => {
+                console.log(err);
+                Notification.error({
+                    title: '登录信息失效',
+                    content: '请重新登录',
+                });
+                router.push('/login');
+            })
+        }
+
+        async function fetchMessage() {
+
+        }
+
+        onMounted(() => {
+            fetchUserName();
+            fetchDeviceCount();
+        })
+
+        return {
+            user_name, msg_cnt, online_cnt, device_cnt
         }
     }
 }

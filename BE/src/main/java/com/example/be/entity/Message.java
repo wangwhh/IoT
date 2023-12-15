@@ -1,5 +1,7 @@
 package com.example.be.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -21,6 +23,7 @@ public class Message implements Serializable {
 
     private Integer state;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime time;
 
     public Integer getDeviceId() {

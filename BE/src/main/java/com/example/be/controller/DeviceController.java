@@ -2,12 +2,14 @@ package com.example.be.controller;
 
 import com.example.be.common.Result;
 import com.example.be.entity.Device;
+import com.example.be.entity.Message;
 import com.example.be.service.IDeviceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.example.be.BeApplication.tokenMap;
 
@@ -17,7 +19,7 @@ import static com.example.be.BeApplication.tokenMap;
  * </p>
  *
  * @author wangwhh
- * @since 2023-12-12
+ * @since 2023-12-14
  */
 @Controller
 @CrossOrigin
@@ -62,5 +64,42 @@ public class DeviceController {
             return Result.error(20003, "登录信息无效，请重新登录");
         }
         return deviceService.deleteDevice(device);
+    }
+
+    @GetMapping("/count")
+    public Result<Map<String, Integer>> count(@RequestHeader("Authorization") String token){
+        Integer userId = tokenMap.get(token);
+        if(userId == null){
+            return Result.error(20003, "登录信息无效，请重新登录");
+        }
+        return Result.success(deviceService.countDevice(userId));
+    }
+
+
+    @GetMapping("/message")
+    public Result<List<Message>> message(@RequestHeader("Authorization") String token, @RequestParam(value = "deviceId") Integer deviceId){
+        Integer userId = tokenMap.get(token);
+        if(userId == null){
+            return Result.error(20003, "登录信息无效，请重新登录");
+        }
+        return deviceService.getDeviceMessage(deviceId);
+    }
+
+    @GetMapping("/device_msg_cnt")
+    public Result<Map<String, Integer>> countDeviceMessage(@RequestHeader("Authorization") String token){
+        Integer userId = tokenMap.get(token);
+        if(userId == null){
+            return Result.error(20003, "登录信息无效，请重新登录");
+        }
+        return Result.success(deviceService.countDeviceMessage(userId));
+    }
+
+    @GetMapping("/date_msg_cnt")
+    public Result<Map<String, Integer>> countDateMessage(@RequestHeader("Authorization") String token){
+        Integer userId = tokenMap.get(token);
+        if(userId == null){
+            return Result.error(20003, "登录信息无效，请重新登录");
+        }
+        return Result.success(deviceService.countDateMessage(userId));
     }
 }

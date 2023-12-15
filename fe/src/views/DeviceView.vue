@@ -32,7 +32,7 @@
                 <template #actions>
                     <a-tag color="arcoblue">{{device.type}}</a-tag>
                     <a-badge dot :count="9" :max-count="10" :offset="[-1, 1]">
-                        <span class="icon-hover" style="font-size: 20px" @click="openMsgList"> <IconMessage /> </span>
+                        <span class="icon-hover" style="font-size: 20px" @click="openMsgList(device)"> <IconMessage /> </span>
                     </a-badge>
                     <span class="icon-hover" style="font-size: 20px" @click="openEditForm(device)"> <icon-edit /> </span>
                     <a-popconfirm content="确认要删除这个设备吗？" type="warning" @ok="handleDelete(device)">
@@ -117,7 +117,7 @@
                 {{ msg_list.device_name }}
             </template>
             <a-list-item v-for="msg in msg_list.list">
-                <a-list-item-meta :title="msg.time" :description="msg.msg">
+                <a-list-item-meta :title="msg.time" :description="msg.data">
                     <template #avatar>
                         <a-avatar :style="{ backgroundColor: msg.state === 1 ? '#4080FF':'#F76560' }">
                             <icon-check v-if="msg.state === 1"/>
@@ -161,7 +161,7 @@ export default {
             type: '',
             description: '',
             addDate: getToday(),
-            soc: 1,
+            soc: 0,
             msgCnt: 0,
         });
 
@@ -170,7 +170,8 @@ export default {
             let year = date.getFullYear();
             let month = date.getMonth()+1;
             let day = date.getDate();
-            return year+'-'+month+'-'+day;
+            console.log(year+'-'+month+'-'+day+' '+date.toLocaleTimeString());
+            return year+'-'+month+'-'+day+' '+date.toLocaleTimeString()
         }
 
         const msg_visible = ref(false);
@@ -296,10 +297,44 @@ export default {
             edit_visible.value = true;
         }
 
+
+        async function getMsgList(device){
+            await api.get('/device/message', {
+                params: {
+                    deviceId: device.deviceId,
+                }
+            }).then((res) => {
+                if (res.data.code === 10000) {
+                    msg_list.value.list = res.data.data;
+                    console.log(msg_list.value.list.time);
+                } else {
+                    if (res.data.code === 20003) {
+                        Notification.error({
+                            title: '登录信息无效',
+                            content: '请先登录',
+                        });
+                        // router.push('/login');
+                    } else {
+                        Notification.error({
+                            title: '获取消息列表失败',
+                            content: '请稍后再试',
+                        });
+                    }
+                }
+            }).catch((err) => {
+                console.log(err);
+                Notification.error({
+                    title: '登录信息失效',
+                    content: '请重新登录',
+                });
+                // router.push('/login');
+            })
+        }
+
         function openMsgList(device){
-            msg_list.value.list = device.msg_list;
-            msg_list.value.device_name = device.name;
             msg_visible.value = true;
+            msg_list.value.device_name = device.deviceName;
+            getMsgList(device);
         }
 
         function handleDelete(device){
@@ -316,7 +351,7 @@ export default {
                             title: '登录信息无效',
                             content: '请先登录',
                         });
-                        // router.push('/login');
+                        router.push('/login');
                     } else {
                         Notification.error({
                             title: '删除失败',
@@ -330,7 +365,7 @@ export default {
                     title: '登录信息失效',
                     content: '请重新登录',
                 });
-                // router.push('/login');
+                router.push('/login');
             })
         }
 
