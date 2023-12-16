@@ -3,7 +3,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { graphic } from 'echarts';
 import { use } from 'echarts/core';
 import {
@@ -15,6 +15,8 @@ import {
 } from 'echarts/components';
 import { LineChart } from 'echarts/charts';
 import VChart from 'vue-echarts';
+import api from "@/api/api";
+import router from "@/router";
 
 use([
     LineChart,
@@ -38,8 +40,8 @@ function graphicFactory(side) {
         },
     };
 }
-const chartsData = ref([10, 8, 2, 13, 11, 20, 13]);
-const xAxis = ref(['2023-1-1', '2023-1-2', '2023-1-3', '2023-1-4', '2023-1-5', '2023-1-6', '2023-1-7']);
+const chartsData = ref([]);
+const xAxis = ref([]);
 const graphicElements = ref([
     graphicFactory({ left: '2.6%' }),
     graphicFactory({ right: 0 }),
@@ -160,6 +162,42 @@ const option = ref({
     ],
 
 })
+
+async function fetchData() {
+    await api.get('/device/date_msg_cnt', {}).then((res) => {
+        if (res.data.code === 10000) {
+            console.log(res.data.data)
+            for(let i = 0; i < res.data.data.length; i++) {
+                chartsData.value.push(res.data.data[i].cnt);
+                xAxis.value.push(res.data.data[i].date);
+            }
+            console.log(chartsData.value);
+            console.log(xAxis.value);
+        } else {
+            if (res.data.code === 20003) {
+                Notification.error({
+                    title: '登录信息无效',
+                    content: '请先登录',
+                });
+                router.push('/login');
+            } else {
+                Notification.error({
+                    title: '获取设备消息数失败',
+                    content: '请稍后再试',
+                });
+            }
+        }
+    }).catch((err) => {
+        Notification.error({
+            title: '获取设备消息数失败',
+            content: '请稍后再试',
+        });
+    });
+}
+
+onMounted(() => {
+    fetchData();
+});
 
 </script>
 

@@ -1,7 +1,10 @@
 package com.example.be.service;
 
+import com.example.be.common.Result;
 import com.example.be.entity.Message;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +16,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IMessageService extends IService<Message> {
 
+    Result<List<Message>> getDeviceMessage(Integer deviceId);
 }

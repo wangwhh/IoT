@@ -78,7 +78,7 @@
                 </a-avatar>
                 <a-statistic
                         title="新增数据"
-                        :value="15"
+                        :value=new_cnt
                         :value-from="0"
                         animation
                         show-group-separator
@@ -188,17 +188,45 @@ export default {
             })
         }
 
-        async function fetchMessage() {
-
+        async function fetchNew() {
+            await api.get('/device/date_msg_cnt', {}).then((res) => {
+                if (res.data.code === 10000) {
+                    let count = 0;
+                    for(let i = 0; i < res.data.data.length; i++) {
+                        count += Number(res.data.data[i].cnt);
+                    }
+                    console.log(count);
+                    new_cnt.value = count;
+                } else {
+                    if (res.data.code === 20003) {
+                        Notification.error({
+                            title: '登录信息无效',
+                            content: '请先登录',
+                        });
+                        router.push('/login');
+                    } else {
+                        Notification.error({
+                            title: '获取设备消息数失败',
+                            content: '请稍后再试',
+                        });
+                    }
+                }
+            }).catch((err) => {
+                Notification.error({
+                    title: '获取设备消息数失败',
+                    content: '请稍后再试',
+                });
+            });
         }
 
         onMounted(() => {
             fetchUserName();
             fetchDeviceCount();
+            fetchNew();
         })
 
         return {
-            user_name, msg_cnt, online_cnt, device_cnt
+            user_name, msg_cnt, online_cnt, device_cnt, new_cnt
         }
     }
 }

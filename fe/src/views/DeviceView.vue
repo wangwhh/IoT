@@ -299,7 +299,7 @@ export default {
 
 
         async function getMsgList(device){
-            await api.get('/device/message', {
+            await api.get('/message/device', {
                 params: {
                     deviceId: device.deviceId,
                 }

@@ -1,5 +1,6 @@
 package com.example.be.controller;
 
+import ch.qos.logback.core.joran.sanity.Pair;
 import com.example.be.common.Result;
 import com.example.be.entity.Device;
 import com.example.be.entity.Message;
@@ -75,18 +76,8 @@ public class DeviceController {
         return Result.success(deviceService.countDevice(userId));
     }
 
-
-    @GetMapping("/message")
-    public Result<List<Message>> message(@RequestHeader("Authorization") String token, @RequestParam(value = "deviceId") Integer deviceId){
-        Integer userId = tokenMap.get(token);
-        if(userId == null){
-            return Result.error(20003, "登录信息无效，请重新登录");
-        }
-        return deviceService.getDeviceMessage(deviceId);
-    }
-
     @GetMapping("/device_msg_cnt")
-    public Result<Map<String, Integer>> countDeviceMessage(@RequestHeader("Authorization") String token){
+    public Result<List<Map<String, String>>> countDeviceMessage(@RequestHeader("Authorization") String token){
         Integer userId = tokenMap.get(token);
         if(userId == null){
             return Result.error(20003, "登录信息无效，请重新登录");
@@ -95,7 +86,7 @@ public class DeviceController {
     }
 
     @GetMapping("/date_msg_cnt")
-    public Result<Map<String, Integer>> countDateMessage(@RequestHeader("Authorization") String token){
+    public Result<List<Map<String, String>>> countDateMessage(@RequestHeader("Authorization") String token){
         Integer userId = tokenMap.get(token);
         if(userId == null){
             return Result.error(20003, "登录信息无效，请重新登录");

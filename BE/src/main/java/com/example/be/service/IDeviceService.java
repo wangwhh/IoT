@@ -1,5 +1,6 @@
 package com.example.be.service;
 
+import ch.qos.logback.core.joran.sanity.Pair;
 import com.example.be.common.Result;
 import com.example.be.entity.Device;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -27,9 +28,9 @@ public interface IDeviceService extends IService<Device> {
 
     Map<String, Integer> countDevice(Integer userId);
 
-    Result<List<Message>> getDeviceMessage(Integer deviceId);
+//    Result<List<Message>> getDeviceMessage(Integer deviceId);
 
-    Map<String, Integer> countDeviceMessage(Integer userId);
+    List<Map<String, String>> countDeviceMessage(Integer userId);
 
-    Map<String, Integer> countDateMessage(Integer userId);
+    List<Map<String, String>> countDateMessage(Integer userId);
 }

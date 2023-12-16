@@ -12,7 +12,9 @@ import {
     LegendComponent,
 } from 'echarts/components';
 import VChart from 'vue-echarts';
-import {ref} from 'vue';
+import {ref, onMounted} from 'vue';
+import api from "@/api/api";
+import router from "@/router";
 
 use([
     CanvasRenderer,
@@ -22,6 +24,8 @@ use([
     LegendComponent,
 ]);
 
+const legendData = ref([]);
+const seriesData = ref([]);
 
 const option = ref({
     title: {
@@ -40,7 +44,7 @@ const option = ref({
     legend: {
         orient: 'vertical',
         left: 'left',
-        data: ['智能灯光', '智能冰箱', '扫地机器人', '智能空调', '智能电动车'],
+        data: legendData.value,
     },
     series: [
         {
@@ -48,13 +52,7 @@ const option = ref({
             type: 'pie',
             radius: '55%',
             center: ['50%', '60%'],
-            data: [
-                {value: 335, name: '智能灯光'},
-                {value: 310, name: '智能冰箱'},
-                {value: 234, name: '扫地机器人'},
-                {value: 135, name: '智能空调'},
-                {value: 1548, name: '智能电动车'},
-            ],
+            data: seriesData.value,
             emphasis: {
                 itemStyle: {
                     shadowBlur: 10,
@@ -68,6 +66,48 @@ const option = ref({
         },
     ],
 });
+
+async function fetchData() {
+    await api.get('/device/device_msg_cnt', {}).then((res) => {
+        if (res.data.code === 10000) {
+            // console.log(res.data.data)
+            for(let i = 0; i < res.data.data.length; i++) {
+                legendData.value.push(res.data.data[i].deviceName);
+                seriesData.value.push({
+                    value: res.data.data[i].cnt,
+                    name: res.data.data[i].deviceName,
+                });
+            }
+            console.log(legendData.value);
+            console.log(seriesData.value);
+        } else {
+            if (res.data.code === 20003) {
+                Notification.error({
+                    title: '登录信息无效',
+                    content: '请先登录',
+                });
+                router.push('/login');
+            } else {
+                Notification.error({
+                    title: '获取设备消息数失败',
+                    content: '请稍后再试',
+                });
+            }
+        }
+    }).catch((err) => {
+        Notification.error({
+            title: '获取设备消息数失败',
+            content: '请稍后再试',
+        });
+    });
+}
+
+onMounted(() => {
+    fetchData();
+});
+
+
+
 </script>
 
 <style scoped>

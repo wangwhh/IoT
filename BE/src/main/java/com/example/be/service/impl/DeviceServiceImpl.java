@@ -3,7 +3,6 @@ package com.example.be.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.be.common.Result;
 import com.example.be.entity.Device;
-import com.example.be.entity.Message;
 import com.example.be.mapper.DeviceMapper;
 import com.example.be.service.IDeviceService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -11,12 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.time.DayOfWeek;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <p>
@@ -74,46 +69,53 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
             if(device.getSoc() != 0) {
                 online_cnt++;
             }
-            List<Message> list1 = deviceMapper.getMessage(device.getDeviceId());
-            total_msg += list1.size();
+
+            total_msg += deviceMapper.countDeviceMessage(device.getDeviceId());
         }
         return Map.of("device_cnt", device_cnt, "online_cnt", online_cnt, "total_msg", total_msg);
     }
 
-    @Override
-    public Result<List<Message>> getDeviceMessage(Integer deviceId) {
-        List<Message> list = deviceMapper.getMessage(deviceId);
-        return Result.success(list);
-    }
+//    @Override
+//    public Result<List<Message>> getDeviceMessage(Integer deviceId) {
+//        List<Message> list = deviceMapper.getMessage(deviceId);
+//        return Result.success(list);
+//    }
 
     @Override
-    public Map<String, Integer> countDeviceMessage(Integer userId) {
+    public List<Map<String, String>> countDeviceMessage(Integer userId) {
         LambdaQueryWrapper<Device> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Device::getOwnerId, userId);
         List<Device> list = this.baseMapper.selectList(wrapper);
-        Map<String, Integer> ret = new HashMap<>();
+        List<Map<String, String>> ret = new ArrayList<>();
         for(Device device : list) {
-            int cnt = getDeviceMessage(device.getDeviceId()).getData().size();
-            ret.put(device.getDeviceName(), cnt);
+            Map<String, String> map = new HashMap<>();
+            int cnt = deviceMapper.countDeviceMessage(device.getDeviceId());
+            map.put("deviceName", device.getDeviceName());
+            map.put("cnt", String.valueOf(cnt));
+            ret.add(map);
         }
         return ret;
     }
 
     @Override
-    public Map<String, Integer> countDateMessage(Integer userId) {
+    public List<Map<String, String>> countDateMessage(Integer userId) {
         LambdaQueryWrapper<Device> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Device::getOwnerId, userId);
         List<Device> list = this.baseMapper.selectList(wrapper);
-        Map<String, Integer> ret = new HashMap<>();
+        List<Map<String, String>> ret = new ArrayList<>();
         LocalDateTime localDateTime = LocalDateTime.now();
 
         // 统计近一周每天的消息数量
-        for(int i = 0; i < 7; i++) {
+        for(int i = 6; i >= 0; i--) {
             int cnt = 0;
+            Map<String, String> map = new HashMap<>();
+            String date = localDateTime.minusDays(i).format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd"));
             for(Device device : list) {
-                cnt += deviceMapper.countDateMessage(device.getDeviceId(), localDateTime.minusDays(i).toString());
+                cnt += deviceMapper.countDateMessage(device.getDeviceId(), date);
             }
-            ret.put(localDateTime.minusDays(i).toString(), cnt);
+            map.put("date", date);
+            map.put("cnt", String.valueOf(cnt));
+            ret.add(map);
         }
 
         return ret;
