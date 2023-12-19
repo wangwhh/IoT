@@ -23,6 +23,12 @@ public class Message implements Serializable {
 
     private Integer state;
 
+    private Integer value;
+
+    private Double lng;
+
+    private Double lat;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime time;
 
@@ -58,6 +64,32 @@ public class Message implements Serializable {
         this.time = time;
     }
 
+    public Integer getValue() {
+        return value;
+    }
+
+    public void setValue(Integer value) {
+        this.value = value;
+    }
+
+    public Double getLng() {
+        return lng;
+    }
+
+    public void setLng(Double lng) {
+        this.lng = lng;
+    }
+
+    public Double getLat() {
+        return lat;
+    }
+
+    public void setLat(Double lat) {
+        this.lat = lat;
+    }
+
+
+
     @Override
     public String toString() {
         return "Message{" +
@@ -65,6 +97,9 @@ public class Message implements Serializable {
             ", data = " + data +
             ", state = " + state +
             ", time = " + time +
+            ", value = " + value +
+            ", lng = " + lng +
+            ", lat = " + lat +
         "}";
     }
 }

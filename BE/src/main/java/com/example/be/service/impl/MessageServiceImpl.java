@@ -28,4 +28,9 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
         List<Message> list = this.baseMapper.selectList(wrapper);
         return Result.success(list);
     }
+
+    @Override
+    public void insertMessage(Message message) {
+        this.baseMapper.insert(message);
+    }
 }

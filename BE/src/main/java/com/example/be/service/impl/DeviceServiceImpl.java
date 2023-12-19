@@ -37,7 +37,7 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
     @Override
     public Result<Integer> addDevice(Device device) {
         this.baseMapper.insert(device);
-        deviceMapper.insertMessage(device.getDeviceId(), "添加设备"+device.getDeviceName(), 1, device.getAddDate().toString());
+        deviceMapper.insertMessage(device.getDeviceId(), "添加设备"+device.getDeviceName(), 1, device.getAddDate().toString(), 0);
         return Result.success("添加成功", device.getDeviceId());
     }
 
@@ -46,7 +46,7 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
         this.baseMapper.updateById(device);
         Date date = new Date(System.currentTimeMillis());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        deviceMapper.insertMessage(device.getDeviceId(), "修改设备信息", 1, dateFormat.format(date));
+        deviceMapper.insertMessage(device.getDeviceId(), "修改设备信息", 1, dateFormat.format(date),(int)(device.getSoc() * 100));
         return Result.success("更新成功");
     }
 

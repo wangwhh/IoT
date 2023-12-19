@@ -52,6 +52,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         if(user1 != null){
             return Result.error(20002, "该邮箱已被注册");
         }
+        wrapper.clear();
+        wrapper.eq(User::getUserName, user.getUserName());
+        user1 = this.baseMapper.selectOne(wrapper);
+        if(user1 != null){
+            return Result.error(20005, "该用户名已被注册");
+        }
         this.baseMapper.insert(user);
         return Result.success("注册成功");
     }

@@ -17,4 +17,6 @@ import java.util.List;
 public interface IMessageService extends IService<Message> {
 
     Result<List<Message>> getDeviceMessage(Integer deviceId);
+
+    void insertMessage(Message message);
 }
