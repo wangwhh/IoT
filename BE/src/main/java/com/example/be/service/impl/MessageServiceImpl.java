@@ -2,13 +2,14 @@ package com.example.be.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.be.common.Result;
+import com.example.be.entity.Device;
 import com.example.be.entity.Message;
 import com.example.be.mapper.MessageMapper;
 import com.example.be.service.IMessageService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
 
 /**
  * <p>
@@ -32,5 +33,33 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
     @Override
     public void insertMessage(Message message) {
         this.baseMapper.insert(message);
+    }
+
+    @Override
+    public Result<List<Map<String, String>>> getDeviceLocation(Integer ownerId) {
+        List<Device> devices = this.baseMapper.selectDevice(ownerId);
+        List<Map<String, String>> ret = new ArrayList<>();
+        if(devices != null){
+            for (Device device : devices) {
+                LambdaQueryWrapper<Message> wrapper = new LambdaQueryWrapper<>();
+                wrapper.eq(Message::getDeviceId, device.getDeviceId());
+                wrapper.orderByDesc(Message::getTime);
+                List<Message> list = this.baseMapper.selectList(wrapper);
+                Map<String, String> map = new HashMap<>();
+                map.put("device_id", device.getDeviceId().toString());
+                map.put("device_name", device.getDeviceName());
+                map.put("msg_cnt", list.size() + "");
+                if(list.size() == 0){
+                    map.put("position", "[119.9, 30.1]");
+                } else {
+                    List<Double>position = new ArrayList<>();
+                    position.add(list.get(0).getLng());
+                    position.add(list.get(0).getLat());
+                    map.put("position", position.toString());
+                }
+                ret.add(map);
+            }
+        }
+        return Result.success(ret);
     }
 }

@@ -49,7 +49,7 @@ public class WorkerThread extends Thread {
                 msg.setData("Device Data " + sdf.format(now));
                 msg.setValue(value);
                 //超过80告警
-                msg.setState(value > 80 ? 1 : 0);
+                msg.setState(value > 20 ? 1 : 0);
                 rand.nextFloat();
                 //根据杭州经纬度随机生成设备位置信息
                 msg.setLng(119.9 + rand.nextFloat() * 0.6);

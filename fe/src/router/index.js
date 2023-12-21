@@ -4,6 +4,7 @@ import LoginView from "@/views/LoginView.vue";
 import DeviceView from "@/views/DeviceView.vue";
 import MapView from "@/views/MapView.vue";
 import UserView from "@/views/UserView.vue";
+import TrackView from "@/views/TrackView.vue";
 
 const routes = [
     {
@@ -33,6 +34,11 @@ const routes = [
         path: '/map',
         name: 'map',
         component: MapView
+    },
+    {
+        path: '/track',
+        name: 'track',
+        component: TrackView
     },
     {
         path: '/user',

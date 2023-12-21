@@ -19,6 +19,9 @@
                 <router-link to="/map">
                     <a-menu-item key="1_1">设备地图</a-menu-item>
                 </router-link>
+                <router-link to="/track">
+                    <a-menu-item key="1_2">设备轨迹</a-menu-item>
+                </router-link>
             </a-sub-menu>
             <router-link to="user">
                 <a-menu-item key="2">

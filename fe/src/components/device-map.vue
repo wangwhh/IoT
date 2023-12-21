@@ -3,55 +3,59 @@
 </template>
 
 <script>
-import {ref} from "vue";
+import {ref, onMounted} from "vue";
 import {shallowRef} from "@vue/reactivity";
 import AMapLoader from '@amap/amap-jsapi-loader';
 import marker_img from '@/assets/marker.png'
+import api from "@/api/api";
+import router from "@/router";
+import {Notification} from "@arco-design/web-vue";
 
 export default {
     name: "device-map",
     setup() {
-        const locationData = ref([{
-            device_id: 1,
-            name: '智能灯光',
-            msg_cnt: 10,
-            position: [116.39, 39.9],
-        }, {
-            device_id: 2,
-            name: '智能冰箱',
-            msg_cnt: 5,
-            position: [116.25, 39.85],
-        }, {
-            device_id: 3,
-            name: '扫地机器人',
-            msg_cnt: 3,
-            position: [116.6, 39.9],
-        }, {
-            device_id: 4,
-            name: '智能空调',
-            msg_cnt: 2,
-            position: [116.7, 39.77],
-        }, {
-            device_id: 5,
-            name: '智能电动车',
-            msg_cnt: 20,
-            position: [116.8, 40],
-        }, {
-            device_id: 6,
-            name: '智能门锁',
-            msg_cnt: 1,
-            position: [116.42, 40.05],
-        }, {
-            device_id: 7,
-            name: '监控摄像头',
-            msg_cnt: 0,
-            position: [116.38, 40.2],
-        }])
+        const locationData = ref([])
         let map = shallowRef(null);
         const hover_device_ind = ref();
 
+        async function fetchLocationData() {
+            await api.get('/message/location').then((res) => {
+                if (res.data.code === 10000) {
+                    locationData.value = res.data.data;
+                    locationData.value.forEach(item => {
+                        if (item.position && typeof item.position === 'string') {
+                            try {
+                                item.position = JSON.parse(item.position);
+                            } catch (e) {
+                                console.error("Error parsing position for device", item.device_id, e);
+                            }
+                        }
+                    });
+                    console.log(locationData.value);
+                } else {
+                    if (res.data.code === 20003) {
+                        Notification.error({
+                            title: '登录信息无效',
+                            content: '请先登录',
+                        });
+                        router.push('/login');
+                    } else {
+                        Notification.error({
+                            title: '获取设备位置信息失败',
+                            content: '请稍后再试',
+                        });
+                    }
+                }
+            }).catch((err) => {
+                Notification.error({
+                    title: '获取设备位置信息失败',
+                    content: '请稍后再试',
+                });
+            });
+        }
 
         function initMap() {
+            console.log("init map")
             AMapLoader.load({
                 key: "e3c2518eaa46199822ec78260a887817",
                 version: "2.0",
@@ -62,7 +66,6 @@ export default {
                     image: marker_img,
                     imageSize: new AMap.Size(45, 45)
                 });
-
 
                 const contentElement = document.createElement('div');
                 const infoWindow = new AMap.InfoWindow({
@@ -76,7 +79,7 @@ export default {
                     contentElement.className = 'echarts-tooltip-diy';
                     contentElement.innerHTML = `
                         <div style="padding: 10px">
-                            <p class="tooltip-title">${locationData.value[hover_device_ind.value].name}</p>
+                            <p class="tooltip-title">${locationData.value[hover_device_ind.value].device_name}</p>
                             <div class="content-panel"><span>消息数量</span><span class="tooltip-value">${locationData.value[hover_device_ind.value].msg_cnt}</span></div>
                         </div>
                     `;
@@ -86,7 +89,7 @@ export default {
 
                 map = new AMap.Map('map', {
                     zoom: 10,
-                    center: [116.39, 39.9],
+                    center: [120.2, 30.3],
                     resizeEnable: true,
                 });
                 for (let i = 0; i < locationData.value.length; i++) {
@@ -109,24 +112,21 @@ export default {
             })
         }
 
+        onMounted(() => {
+            fetchLocationData().then(initMap);
+        });
 
         return {
-          map, initMap, locationData, hover_device_ind
+          map, locationData, hover_device_ind
         };
     },
-    methods: {
-
-    },
-    mounted() {
-        this.initMap();
-    }
 }
 </script>
 
 <style scoped>
 #map {
     width: 80%;
-    height: 500px;
+    height: 600px;
     margin: auto;
     padding: 20px;
     border: 20px solid #CBD9FFE5;

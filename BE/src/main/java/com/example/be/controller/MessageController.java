@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.example.be.BeApplication.tokenMap;
 
@@ -34,4 +35,14 @@ public class MessageController {
         }
         return messageService.getDeviceMessage(deviceId);
     }
+
+    @GetMapping("/location")
+    public Result<List<Map<String, String>>> location(@RequestHeader("Authorization") String token){
+        Integer userId = tokenMap.get(token);
+        if(userId == null){
+            return Result.error(20003, "登录信息无效，请重新登录");
+        }
+        return messageService.getDeviceLocation(userId);
+    }
+
 }

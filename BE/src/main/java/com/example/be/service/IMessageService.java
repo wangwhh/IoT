@@ -5,6 +5,7 @@ import com.example.be.entity.Message;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -19,4 +20,6 @@ public interface IMessageService extends IService<Message> {
     Result<List<Message>> getDeviceMessage(Integer deviceId);
 
     void insertMessage(Message message);
+
+    Result<List<Map<String, String>>> getDeviceLocation(Integer ownerId);
 }

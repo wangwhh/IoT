@@ -120,6 +120,4 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
 
         return ret;
     }
-
-
 }
