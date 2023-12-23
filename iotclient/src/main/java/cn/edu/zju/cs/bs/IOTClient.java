@@ -21,7 +21,7 @@ public class IOTClient {
             clientPrefix = properties.getProperty("prefix");
 
             Vector<WorkerThread> threadVector = new Vector<WorkerThread>();
-            for (int i = 0; i < devices; i++) {
+            for (int i = 16; i < 18; i++) {
                 WorkerThread thread = new WorkerThread();
                 thread.setDeviceId(i + 1);
                 thread.setMqttServer(mqttServer);

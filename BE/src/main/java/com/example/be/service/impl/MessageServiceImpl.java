@@ -33,6 +33,7 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
     @Override
     public void insertMessage(Message message) {
         this.baseMapper.insert(message);
+        this.baseMapper.updateDevice(message.getDeviceId(), message.getValue()/100.0, message.getLng(), message.getLat());
     }
 
     @Override

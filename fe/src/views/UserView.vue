@@ -8,9 +8,6 @@
       <a-layout-content style="padding: 50px">
           <a-descriptions style="margin-top: 20px; margin-left: 5%" :data="user_info" size="large" title="个人信息" :column="1"/>
           <a-divider style="margin-top: 3%; margin-bottom: 3%;"><icon-star /></a-divider>
-          <a-timeline reverse style="margin-top: 20px; margin-left: 5%">
-              <a-timeline-item v-for="milestone in milestones" :label="milestone.time">{{milestone.msg}}</a-timeline-item>
-          </a-timeline>
       </a-layout-content>
   </a-layout>
 
@@ -194,20 +191,6 @@ export default {
         }
 
 
-        const milestones = ref([{
-            time: '2017-03-10',
-            msg: '添加智能灯光',
-        }, {
-            time: '2018-05-12',
-            msg: '添加智能洗碗机',
-        }, {
-            time: '2020-09-30',
-            msg: '删除智能洗碗机',
-        }, {
-            time: '2020-10-01',
-            msg: '添加智能冰箱',
-        }]);
-
         function logout() {
             api.post('/user/logout', {}).then((res) => {
                 if(res.data.code === 10000) {
@@ -230,7 +213,7 @@ export default {
             fetchUserInfo(); // 组件挂载后获取用户信息
         });
         return {
-            user_info, milestones, edit_form_visible, edit_form, errorStatus, alerts,
+            user_info, edit_form_visible, edit_form, errorStatus, alerts,
             logout, handleCancel, handleBeforeOk, handleEditClicked
         }
     },

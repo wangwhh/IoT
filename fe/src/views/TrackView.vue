@@ -108,7 +108,9 @@ export default {
                 if(track_list.value.length > 0) {
                     let path = [];
                     for(let track of track_list.value) {
-                        path.push([track.lng, track.lat]);
+                        if(track.lng != null && track.lat != null) {
+                            path.push([track.lng, track.lat]);
+                        }
                     }
                     // console.log(path)
                     let polyline = new AMap.Polyline({

@@ -1,5 +1,5 @@
 <template>
-    <a-select :default-value="select_tag" style="width: 360px; margin-left: 5%" size="large"
+    <a-select :default-value="select_tag" style="width: 360px; margin-left: 5%; margin-top: 2%" size="large"
               placeholder="选择设备类型" multiple  allow-clear @change="updateSelect">
         <a-option>照明</a-option>
         <a-option>家电</a-option>
@@ -7,15 +7,6 @@
         <a-option>安防</a-option>
         <a-option>其他</a-option>
     </a-select>
-
-    <a-input-search style="width:300px; margin-left: 2%; margin-top: 2%" placeholder="查询设备" search-button>
-        <template #button-icon>
-            <icon-search/>
-        </template>
-        <template #button-default>
-            搜索
-        </template>
-    </a-input-search>
 
     <a-button type="primary" style="margin-left: 2%" @click="insert_visible = true;">
         <template #icon>

@@ -17,7 +17,7 @@ import org.apache.ibatis.annotations.Select;
  */
 @Mapper
 public interface DeviceMapper extends BaseMapper<Device> {
-    @Insert("insert into message (device_id, data, state, time, value) " +
+    @Insert("insert into message (device_id, data, state, time, value)" +
             "values (#{deviceId}, #{data}, #{state}, #{time}, #{value})")
     void insertMessage(Integer deviceId, String data, Integer state, String time, Integer value);
 

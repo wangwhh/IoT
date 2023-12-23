@@ -1,5 +1,6 @@
 <template>
-    <v-chart :option="option"/>
+    <a-empty v-if="isEmpty" style="height: 100%; padding: 30% 0"/>
+    <v-chart :option="option" v-else/>
 </template>
 
 <script setup>
@@ -26,7 +27,7 @@ use([
 
 const legendData = ref([]);
 const seriesData = ref([]);
-
+const isEmpty = ref(true);
 const option = ref({
     title: {
         text: '设备消息数',
@@ -70,6 +71,9 @@ const option = ref({
 async function fetchData() {
     await api.get('/device/device_msg_cnt', {}).then((res) => {
         if (res.data.code === 10000) {
+            if(res.data.data.length !== 0) {
+                isEmpty.value = false;
+            }
             // console.log(res.data.data)
             for(let i = 0; i < res.data.data.length; i++) {
                 legendData.value.push(res.data.data[i].deviceName);
