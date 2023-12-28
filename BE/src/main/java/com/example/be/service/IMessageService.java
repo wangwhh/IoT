@@ -22,4 +22,6 @@ public interface IMessageService extends IService<Message> {
     void insertMessage(Message message);
 
     Result<List<Map<String, String>>> getDeviceLocation(Integer ownerId);
+
+    Result<String> addMessage(Message message);
 }

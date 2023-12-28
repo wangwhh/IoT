@@ -63,4 +63,10 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message> impl
         }
         return Result.success(ret);
     }
+
+    @Override
+    public Result<String> addMessage(Message message) {
+        this.baseMapper.insert(message);
+        return Result.success("添加成功");
+    }
 }

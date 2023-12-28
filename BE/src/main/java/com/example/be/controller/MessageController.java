@@ -45,4 +45,9 @@ public class MessageController {
         return messageService.getDeviceLocation(userId);
     }
 
+    @PostMapping("/add")
+    public Result<String> add(@RequestBody Message message){
+        return messageService.addMessage(message);
+    }
+
 }
