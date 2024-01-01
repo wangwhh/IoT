@@ -159,9 +159,8 @@ export default {
         function getToday(){
             let date = new Date();
             let year = date.getFullYear();
-            let month = date.getMonth()+1;
-            let day = date.getDate();
-            console.log(year+'-'+month+'-'+day+' '+date.toLocaleTimeString());
+            let month = (date.getMonth()+1).toString().padStart(2, '0');
+            let day = (date.getDate()).toString().padStart(2, '0');
             return year+'-'+month+'-'+day+' '+date.toLocaleTimeString()
         }
 
@@ -247,7 +246,7 @@ export default {
 
 
         function insertOk(){
-            // console.log(insert_form.value);
+            console.log(insert_form.value);
             api.post('device/add', insert_form.value).then((res) => {
                 if (res.data.code === 10000) {
                     Notification.success({
